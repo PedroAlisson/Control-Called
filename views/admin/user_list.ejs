@@ -1,0 +1,30 @@
+
+<%- include('imports') %>
+<div class="container">
+
+        <header>
+            <h1>Usuários Cadastrados</h1>
+        </header>
+            <table class="table table-hover table-dark">
+                    <thead>
+                      <tr>
+                        <th scope="col">Número</th>
+                        <th scope="col">Nome</th>
+                        <th scope="col">E-mail</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Data</th>
+                      </tr>
+                    </thead>
+                    <tbody><% users.forEach( user => { %> 
+                      <tr> 
+                        <td><%- user.id %></td>
+                        <td><%- user.name %></td>
+                        <td><%- user.email %></td>
+                        <td>
+                          <button type="button" class="btn btn-warning"><i class="far fa-edit"> Editar </i></button>
+                          <button type="button" class="btn btn-danger"><i class="far fa-edit"> Excluir </i></button>
+                      </tr>
+                    </tbody> <%})%>
+                  </table>
+    </div>
+        
