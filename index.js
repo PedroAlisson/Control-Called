@@ -71,8 +71,7 @@ app.get('/user/chamados/delete/:id', async(request,response)=>{
     //response.render('/delete') Apagado
 })
 
-app.get('/user/chamados', async(request,response)=>{
-   
+app.get('/user/chamados', async(request,response)=>{   
     const db = await dbConnection
     const calleds = await db.all('select * from called;')
     response.render('user/chamados',{
@@ -80,12 +79,18 @@ app.get('/user/chamados', async(request,response)=>{
     })
 })
 
-app.get('/user/consulta', (request,response)=>{
+app.get('/user/consulta', async(request,response)=>{
+
     response.render('user/consulta')
 })
 
-app.post('/user/consulta', (request,response)=>{
-    response.render('')
+app.post('/user/consulta', async(request,response)=>{
+    const {number} = request.body
+    const db = await dbConnection
+    const calleds = await db.get(`select * from called where id ='${number}';`)
+    response.render('user/result_consulta',{
+         calleds 
+    })
 })
 
 */Criando Router Admin /*
@@ -134,6 +139,21 @@ app.get('/admin/userlist/delete/:id', async(request,response)=>{
      await db.run('delete from users where id ='+request.params.id)
    // response.render('admin/delete')
 })
+
+app.get('/admin/consulta', async(request,response)=>{
+
+    response.render('admin/consulta')
+})
+
+app.post('/admin/consulta', async(request,response)=>{
+    const {name} = request.body
+    const db = await dbConnection
+    const users = await db.get(`select * from users where name ='${name}';`)
+    response.render('admin/result_consulta',{
+         users 
+    })
+})
+
 
 
 
