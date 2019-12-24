@@ -27,10 +27,10 @@ app.post('/login', async(request,response)=>{
    const result = await db.get(`select * from users where email ='${email}' and password='${password}';`)   
 
 
-   console.log(result.email)
+   //console.log(result.email)
   // console.log(email)
   
-   if(request.body.email = result.email && (request.body.password = result.password )){
+   if(result){
     console.log("encontrado")
    }else{
     console.log("Não encontrado")
