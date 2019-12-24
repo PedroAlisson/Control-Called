@@ -39,6 +39,10 @@ app.post('/login', async(request,response)=>{
    //response.render(request.body)
 }) 
 
+app.get('/user/dashboard', (request,response)=>{
+    response.render('user/dashboard')
+})
+
 
 app.get('/user/chamados/new', async(request,response)=>{
     response.render('user/novo')
@@ -99,6 +103,11 @@ app.get('/admin', (request,response)=>{
     response.render('login')
 })
 
+app.get('/admin/dashboard', (request,response)=>{
+    response.render('admin/dashboard')
+})
+
+
 app.get('/admin/new', (request,response)=>{
     response.render('admin/user_registration')
 })
@@ -141,8 +150,7 @@ app.get('/admin/userlist/delete/:id', async(request,response)=>{
 })
 
 app.get('/admin/consulta', async(request,response)=>{
-
-    response.render('admin/consulta')
+    response.render('admin/consulta_usuario')
 })
 
 app.post('/admin/consulta', async(request,response)=>{
@@ -154,11 +162,37 @@ app.post('/admin/consulta', async(request,response)=>{
     })
 })
 
+app.get('/admin/chamados', async(request,response)=>{
+    const db = await dbConnection
+    const calleds = await db.all('select * from called;')
+    response.render('admin/chamados',{
+        calleds
+    }) 
+})
 
+app.get('/admin/consulta/chamados', (request,response)=>{   
+    response.render('admin/consulta_usuario')
+})
 
+app.post('/admin/consulta/chamados', async(request,response)=>{   
+    const {number} = request.body
+    const db = await dbConnection
+    const calleds = await db.get(`select * from called where id ='${number}';`)
+    response.render('admin/resul_consulta_chamados',{
+        calleds
+    })
+})
 
+app.get('/admin/chamados/new', async(request,response)=>{
+    response.render('admin/novo')
+})
 
-
+app.post('/admin/chamados/new', async(request,response)=>{
+    const {email,description,status} = request.body
+    const db = await dbConnection
+    await db.run(`insert into called (email, description, status) values('${email}','${description}','${status}');`)
+    response.render('admin/novo')
+})
 
 
 const init = async() =>{

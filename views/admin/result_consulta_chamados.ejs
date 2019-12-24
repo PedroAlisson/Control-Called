@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/fontawesome/css/all.css">
+
+    <title>Chamados</title>
+</head>
+<body>
+   <div class="container">
+
+    <header>
+        <h1>Resultado Consulta Chamado TIC</h1>
+    </header>
+        <table class="table table-hover table-dark">
+                <thead>
+                  <tr>
+                    <th scope="col">Número</th>
+                    <th scope="col">E-mail</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Descrição</th>
+                    <th scope="col">Informações</th>
+                  </tr>
+                </thead>
+                <tbody> 
+                  <tr>
+                    <td><%- calleds.id %></td>
+                    <td><%- calleds.email %></td>
+                    <td><%- calleds.status %></td>
+                    <td><%- calleds.description %></td>
+                    <td>
+                      <button type="button" class="btn btn-warning"><a href="/user/chamados/edit/<%- calleds.id %>"><i class="far fa-edit"> Editar </i></a></button>
+                      <button type="button" class="btn btn-danger"> <a href="/user/chamados/delete/<%- calleds.id %>"> <i class="far fa-edit"> Excluir </i> </a></button>
+                   </td>
+                  </tr>
+                </tbody>
+              </table>
+</div>    
+</body>
+</html>
+

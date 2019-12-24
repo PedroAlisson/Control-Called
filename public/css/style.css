@@ -28,3 +28,21 @@ form{
 table{
     margin-top: 40px;
 }
+
+h1{
+    text-align: center;
+}
+
+.navbar{
+    display: block;
+    width: 300px;
+    height: 100%;
+    margin-left: 30px;
+}
+
+li{
+    list-style: none; 
+    margin-top: 80px;
+    margin-bottom: 80px;
+    text-align: center;
+}
