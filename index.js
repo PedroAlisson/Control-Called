@@ -114,9 +114,9 @@ app.get('/admin/new', (request,response)=>{
 
 
 app.post('/admin/new', async(request,response)=>{
-    const {name,email,password} = request.body
+    const {name,empresa,email,password,status,type} = request.body
     const db = await dbConnection
-    await db.run(`insert into users (name, email, password) values('${name}','${email}','${password}');`)
+    await db.run(`insert into users (name, empresa , email, password, status, type) values('${name}', '${empresa}','${email}','${password}', '${status}', '${type}');`)
     response.render('admin/user_registration')
  })
 
@@ -130,10 +130,10 @@ app.get('/admin/userlist', async(request,response)=>{
 }) 
 
 app.post('/admin/userlist/edit/:id', async(request,response)=>{
-    const {name,email,password} = request.body
+    const {name,empresa,email,password,status,type} = request.body
     const {id} = request.params 
     const db = await dbConnection
-    await db.run(`update users set name ='${name}', email ='${email}' , password='${password}' where id = ${id};`)
+    await db.run(`update users set name ='${name}', empresa ='${empresa}', email ='${email}' , status ='${status}', password ='${password}', type ='${type}' where id = ${id};`)
    // response.render('user/novo')
 }) 
 
@@ -157,7 +157,7 @@ app.post('/admin/consulta', async(request,response)=>{
     const {name} = request.body
     const db = await dbConnection
     const users = await db.get(`select * from users where name ='${name}';`)
-    response.render('admin/result_consulta',{
+    response.render('admin/result_consulta_usuario',{
          users 
     })
 })
@@ -197,8 +197,8 @@ app.post('/admin/chamados/new', async(request,response)=>{
 
 const init = async() =>{
 const db = await dbConnection
-await db.run('create table if not exists users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, password TEXT);')
-await db.run('create table if not exists called (id INTEGER PRIMARY KEY, email TEXT, description TEXT, status text);')
+await db.run('create table if not exists users (id INTEGER PRIMARY KEY, name text, email TEXT, password TEXT, status boolean, empresa text, type text);')
+await db.run('create table if not exists called (id INTEGER PRIMARY KEY, users_id INTEGER, email text, description TEXT, status text);')
 
 //await db.run('drop table called;')
 //await db.run('drop table users;')

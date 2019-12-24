@@ -20,18 +20,22 @@
                 <thead>
                   <tr>
                     <th scope="col">Número</th>
+                    <th scope="col">Nome</th>
                     <th scope="col">E-mail</th>
                     <th scope="col">Status</th>
                     <th scope="col">Empresa</th>
-                    <th scope="col">Informações</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Ações</th>
                   </tr>
                 </thead>
                 <tbody> 
                   <tr>
                     <td><%- users.id %></td>
+                    <td><%- users.name %></td>
                     <td><%- users.email %></td>
                     <td><%- users.status %></td>
                     <td><%- users.empresa %></td>
+                    <td><%- users.type %></td>
                     <td>
                       <button type="button" class="btn btn-warning"><a href="/admin/userlist/edit/<%- users.id %>"><i class="far fa-edit"> Editar </i></a></button>
                       <button type="button" class="btn btn-danger"><a href="/admin/userlist/delete/<%- users.id %>"><i class="far fa-edit"> Excluir </i></a></button>
