@@ -1,9 +1,7 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
-
 const session = require('express-session')
-
 const sqlite = require('sqlite')
 const dbConnection = sqlite.open('Banco.sqlite', {Promise})
 
@@ -11,7 +9,11 @@ app.set('view engine','ejs')
 
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded({extended: false}))
-app.use(session({secret: "Your secret key"}));
+
+app.use(session({secret: "Your secret key",resave: false,
+saveUninitialized: true,}));
+
+
 
 /* Criando Router Princial */
 
@@ -30,35 +32,33 @@ app.post('/login', async(request,response)=>{
    
    if(result){    
 
-    const users = []
+    console.log(result)
+    const users = [];
 
-    if(result.type == 'Super Administrador'){   
-        
+    if(result.type === 'Super Administrador'){           
         const newusers = {id: result.id, email: result.email, empresa: result.empresa, type: result.type}
         users.push(newusers)
         request.session.users = newusers;
 
-        console.log("Criando uma sessão de Super Administrador",users)
+        //console.log("Criando uma sessão de Super Administrador",users)
 
-        response.render('admin/dashboard')
+        response.redirect('admin/dashboard')
 
-    }else if(result.type == 'Administrador'){
-
+    }else if(result.type ==='Administrador'){
         const newusers = {id: result.id, email: result.email, empresa: result.empresa, type: result.type}
-        users.push(newusers)
+        //users.push(newusers)
         request.session.users = newusers;
 
-        console.log("Criando uma sessão",users)
+        //console.log("Criando uma sessão",users)
 
-    }else if(result.type == 'Normal'){     
-        
+    }else if(result.type === 'Normal'){             
         const newusers = {id: result.id, email: result.email, empresa: result.empresa, type: result.type}
-        users.push(newusers)
-        request.session.users = newusers;
+       users.push(newusers)
+       request.session.users = newusers;
 
-        console.log("Criando uma sessão de Normal",users)
+       // console.log("Criando uma sessão de Normal",users)
 
-        response.render('user/dashboard')
+        response.redirect('user/dashboard')
     }
    }else{
     response.send("Usuário Não encontrado")
@@ -69,21 +69,19 @@ app.post('/login', async(request,response)=>{
 
 /*Criando Middlewares users */
 
-app.use('/users',(request, response, next)=> {
-
-    console.log("Caiu no midewares de users")
-    console.log(request.session.users.type )
-
-    if(request.session.users.type =='Normal'){
+app.use('/user',(request, response, next)=> {  
+    console.log(request)
+    if(request.session.users.type ==='Normal'){
         next(); 
     }
-     response.send('blocked')
+   //  response.send('blocked')
 })
+
 
 app.get('/user/dashboard', (request,response)=>{
+    console.log(request)
     response.render('user/dashboard')
 })
-
 
 app.get('/user/called/new', async(request,response)=>{
     response.render('user/called_new')
@@ -137,29 +135,25 @@ app.post('/user/query', async(request,response)=>{
     })
 })
 
+
+
 */Criando Router Admin /*
 
 app.use('/admin',(request, response, next)=> {
-    if(request.session.users.type =='Super Administrador'){
+  
+    if(request.session.users.type ==='Super Administrador'){
         next(); 
     }
-    response.send('blocked')
-})
- 
-
-app.get('/admin', (request,response)=>{
-    response.render('login')
+    // response.send('blocked')
 })
 
 app.get('/admin/dashboard', (request,response)=>{
     response.render('admin/dashboard')
 })
 
-
 app.get('/admin/new', (request,response)=>{
     response.render('admin/user_registration')
 })
-
 
 app.post('/admin/new', async(request,response)=>{
     const {name,empresa,email,password,status,type} = request.body
@@ -243,11 +237,28 @@ app.post('/admin/called/new', async(request,response)=>{
 })
 
 
+
+
 const init = async() =>{
 const db = await dbConnection
 await db.run('create table if not exists users (id INTEGER PRIMARY KEY, name text, email TEXT, password TEXT, status boolean, empresa text, type text);')
 await db.run('create table if not exists called (id INTEGER PRIMARY KEY, users_id INTEGER, email text, description TEXT, status text);')
+const name = 'Pedro Alisson'
+const empresa = 'dev'
+const email = 'pedro.alisson1997@gmail.com'
+const password = '1'
+const status = 'Ativo'
+const type = 'Normal'
 
+const insert = await db.get(`select * from users where email ='${email}';`)
+   
+if(insert){
+   //console.log('usuário já criado')
+}else{
+    await db.run(`insert into users (name, empresa , email, password, status, type) values('${name}', '${empresa}','${email}','${password}', '${status}', '${type}');`)
+
+}
+   
 //await db.run('drop table called;')
 //await db.run('drop table users;')
 
