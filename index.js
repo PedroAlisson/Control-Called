@@ -1,7 +1,8 @@
 const express = require('express')
-
 const app = express()
 const bodyParser = require('body-parser')
+
+const session = require('express-session')
 
 const sqlite = require('sqlite')
 const dbConnection = sqlite.open('Banco.sqlite', {Promise})
@@ -10,11 +11,12 @@ app.set('view engine','ejs')
 
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded({extended: false}))
+app.use(session({secret: "Your secret key"}));
 
-*/ Criando Router Princial/*
+/* Criando Router Princial */
 
 app.get('/', (request,response)=>{
-    response.render('home')
+      response.render('home')
 })
 
 app.get('/login', (request,response)=>{
@@ -22,22 +24,61 @@ app.get('/login', (request,response)=>{
 })
 
 app.post('/login', async(request,response)=>{
-   const {email,password} = request.body
-   const db = await dbConnection
-   const result = await db.get(`select * from users where email ='${email}' and password='${password}';`)   
+    const {email,password} = request.body
+    const db = await dbConnection
+    const result = await db.get(`select * from users where email ='${email}' and password='${password}';`)  
+   
+   if(result){    
 
+    const users = []
 
-   //console.log(result.email)
-  // console.log(email)
-  
-   if(result){
-    console.log("encontrado")
+    if(result.type == 'Super Administrador'){   
+        
+        const newusers = {id: result.id, email: result.email, empresa: result.empresa, type: result.type}
+        users.push(newusers)
+        request.session.users = newusers;
+
+        console.log("Criando uma sessão de Super Administrador",users)
+
+        response.render('admin/dashboard')
+
+    }else if(result.type == 'Administrador'){
+
+        const newusers = {id: result.id, email: result.email, empresa: result.empresa, type: result.type}
+        users.push(newusers)
+        request.session.users = newusers;
+
+        console.log("Criando uma sessão",users)
+
+    }else if(result.type == 'Normal'){     
+        
+        const newusers = {id: result.id, email: result.email, empresa: result.empresa, type: result.type}
+        users.push(newusers)
+        request.session.users = newusers;
+
+        console.log("Criando uma sessão de Normal",users)
+
+        response.render('user/dashboard')
+    }
    }else{
-    console.log("Não encontrado")
+    response.send("Usuário Não encontrado")
    }
 
    //response.render(request.body)
 }) 
+
+/*Criando Middlewares users */
+
+app.use('/users',(request, response, next)=> {
+
+    console.log("Caiu no midewares de users")
+    console.log(request.session.users.type )
+
+    if(request.session.users.type =='Normal'){
+        next(); 
+    }
+     response.send('blocked')
+})
 
 app.get('/user/dashboard', (request,response)=>{
     response.render('user/dashboard')
@@ -72,7 +113,7 @@ app.get('/user/called/edit/:id', async(request,response)=>{
 app.get('/user/called/delete/:id', async(request,response)=>{
     const db = await dbConnection
     await db.run('delete from called where id ='+request.params.id)
-    //response.render('/delete') Apagado
+    response.send('Chamado apegado') 
 })
 
 app.get('/user/called', async(request,response)=>{   
@@ -97,6 +138,14 @@ app.post('/user/query', async(request,response)=>{
 })
 
 */Criando Router Admin /*
+
+app.use('/admin',(request, response, next)=> {
+    if(request.session.users.type =='Super Administrador'){
+        next(); 
+    }
+    response.send('blocked')
+})
+ 
 
 app.get('/admin', (request,response)=>{
     response.render('login')
@@ -133,7 +182,7 @@ app.post('/admin/userlist/edit/:id', async(request,response)=>{
     const {id} = request.params 
     const db = await dbConnection
     await db.run(`update users set name ='${name}', empresa ='${empresa}', email ='${email}' , status ='${status}', password ='${password}', type ='${type}' where id = ${id};`)
-   // response.render('user/registration_called')
+   response.render('user/registration_called')
 }) 
 
 app.get('/admin/userlist/edit/:id', async(request,response)=>{
@@ -144,8 +193,8 @@ app.get('/admin/userlist/edit/:id', async(request,response)=>{
 
 app.get('/admin/userlist/delete/:id', async(request,response)=>{
     const db = await dbConnection
-     await db.run('delete from users where id ='+request.params.id)
-   // response.render('admin/delete')
+    await db.run('delete from users where id ='+request.params.id)
+    response.send('Usuário Deletado')
 })
 
 app.get('/admin/query', async(request,response)=>{
