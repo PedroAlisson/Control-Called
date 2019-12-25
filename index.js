@@ -27,12 +27,12 @@ app.get('/login', (request,response)=>{
 
 app.post('/login', async(request,response)=>{
     const {email,password} = request.body
+    const status = 'Ativo'
     const db = await dbConnection
-    const result = await db.get(`select * from users where email ='${email}' and password='${password}';`)  
+    const result = await db.get(`select * from users where email ='${email}' and password='${password}' and status='${status}';`)  
    
    if(result){    
 
-    console.log(result)
     const users = [];
 
     if(result.type === 'Super Administrador'){           
@@ -70,7 +70,6 @@ app.post('/login', async(request,response)=>{
 /*Criando Middlewares users */
 
 app.use('/user',(request, response, next)=> {  
-    console.log(request)
     if(request.session.users.type ==='Normal'){
         next(); 
     }
@@ -79,7 +78,6 @@ app.use('/user',(request, response, next)=> {
 
 
 app.get('/user/dashboard', (request,response)=>{
-    console.log(request)
     response.render('user/dashboard')
 })
 
@@ -89,9 +87,18 @@ app.get('/user/called/new', async(request,response)=>{
 
 app.post('/user/called/new', async(request,response)=>{
     const {email,description,status} = request.body
+    const id = request.session.users.id
+    const empresa = request.session.users.empresa
+    const emailsession = request.session.users.email
     const db = await dbConnection
-    await db.run(`insert into called (email, description, status) values('${email}','${description}','${status}');`)
-    response.render('user/called_new')
+
+    if(emailsession === email){    
+        await db.run(`insert into called (users_id, email, description, status, empresa) values('${id}','${email}','${description}','${status}','${empresa}');`)
+        response.render('user/called_new')
+    }else{
+        response.send("Favor digite o meu e-mail")
+    }
+    
 })
 
 app.post('/user/called/edit/:id', async(request,response)=>{
@@ -116,7 +123,8 @@ app.get('/user/called/delete/:id', async(request,response)=>{
 
 app.get('/user/called', async(request,response)=>{   
     const db = await dbConnection
-    const calleds = await db.all('select * from called;')
+    const empresa = request.session.users.empresa
+    const calleds = await db.all(`select * from called  where empresa = '${empresa}';`)
     response.render('user/called',{
         calleds
     })
@@ -158,8 +166,14 @@ app.get('/admin/new', (request,response)=>{
 app.post('/admin/new', async(request,response)=>{
     const {name,empresa,email,password,status,type} = request.body
     const db = await dbConnection
+    const emailsession = request.session.users.email    
+    const emailbanco = await db.get(`select * from users where email ='${email}';`)
+    console.log(emailbanco)
+    if(emailbanco){
+       // response.send('usuário já cadastrado') Consertar
+    }
     await db.run(`insert into users (name, empresa , email, password, status, type) values('${name}', '${empresa}','${email}','${password}', '${status}', '${type}');`)
-    response.render('admin/user_registration')
+    response.render('admin/user_registration')  
  })
 
  
@@ -176,12 +190,12 @@ app.post('/admin/userlist/edit/:id', async(request,response)=>{
     const {id} = request.params 
     const db = await dbConnection
     await db.run(`update users set name ='${name}', empresa ='${empresa}', email ='${email}' , status ='${status}', password ='${password}', type ='${type}' where id = ${id};`)
-   response.render('user/registration_called')
+    response.send('Usuário Alterado')
 }) 
 
 app.get('/admin/userlist/edit/:id', async(request,response)=>{
     const db = await dbConnection
-    const calledsDB = await db.get('select * from users where id ='+request.params.id)
+    const users = await db.get('select * from users where id ='+request.params.id)
     response.render('admin/user_edit')
 })
 
@@ -231,8 +245,9 @@ app.get('/admin/called/new', async(request,response)=>{
 
 app.post('/admin/called/new', async(request,response)=>{
     const {email,description,status} = request.body
+    const empresa = request.session.users.empresa
     const db = await dbConnection
-    await db.run(`insert into called (email, description, status) values('${email}','${description}','${status}');`)
+    await db.run(`insert into called (email, description, status,empresa) values('${email}','${description}','${status}', '${empresa}');`)
     response.render('admin/registration_called')
 })
 
@@ -241,14 +256,14 @@ app.post('/admin/called/new', async(request,response)=>{
 
 const init = async() =>{
 const db = await dbConnection
-await db.run('create table if not exists users (id INTEGER PRIMARY KEY, name text, email TEXT, password TEXT, status boolean, empresa text, type text);')
-await db.run('create table if not exists called (id INTEGER PRIMARY KEY, users_id INTEGER, email text, description TEXT, status text);')
+await db.run('create table if not exists users (id INTEGER PRIMARY KEY, name text, email TEXT, password TEXT, status text, empresa text, type text);')
+await db.run('create table if not exists called (id INTEGER PRIMARY KEY, users_id INTEGER, email text, description TEXT, status text,empresa text);')
 const name = 'Pedro Alisson'
 const empresa = 'dev'
-const email = 'pedro.alisson1997@gmail.com'
+const email = 'pedrodevelope@gmail.com'
 const password = '1'
 const status = 'Ativo'
-const type = 'Normal'
+const type = 'Super Administrador'
 
 const insert = await db.get(`select * from users where email ='${email}';`)
    
