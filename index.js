@@ -21,6 +21,14 @@ app.get('/', (request,response)=>{
       response.render('home')
 })
 
+app.get('/logout', function(request, response){
+    request.session.destroy(function(){
+       console.log("user logged out.")
+    });
+    response.redirect('/login');
+ });
+ 
+
 app.get('/login', (request,response)=>{
     response.render('login')
 })
@@ -86,14 +94,14 @@ app.get('/user/called/new', async(request,response)=>{
 })
 
 app.post('/user/called/new', async(request,response)=>{
-    const {email,description,status} = request.body
+    const {email,description,status,title} = request.body
     const id = request.session.users.id
     const empresa = request.session.users.empresa
     const emailsession = request.session.users.email
     const db = await dbConnection
 
     if(emailsession === email){    
-        await db.run(`insert into called (users_id, email, description, status, empresa) values('${id}','${email}','${description}','${status}','${empresa}');`)
+        await db.run(`insert into called (users_id, email, description, status, empresa,title) values('${id}','${email}','${description}','${status}','${empresa}','${title}');`)
         response.render('user/called_new')
     }else{
         response.send("Favor digite o meu e-mail")
@@ -102,10 +110,10 @@ app.post('/user/called/new', async(request,response)=>{
 })
 
 app.post('/user/called/edit/:id', async(request,response)=>{
-    const {email,description,status} = request.body
+    const {email,description,status,title} = request.body
     const {id} = request.params 
     const db = await dbConnection
-    await db.run(`update called set email ='${email}', description ='${description}' , status='${status}' where id = ${id};`)
+    await db.run(`update called set email ='${email}', description ='${description}' , status='${status}' , title='${title}' where id = ${id};`)
     response.render('user/called_new')
 }) 
 
@@ -118,12 +126,13 @@ app.get('/user/called/edit/:id', async(request,response)=>{
 app.get('/user/called/delete/:id', async(request,response)=>{
     const db = await dbConnection
     await db.run('delete from called where id ='+request.params.id)
-    response.send('Chamado apegado') 
+    response.send('Chamado apagado') 
 })
 
 app.get('/user/called', async(request,response)=>{   
     const db = await dbConnection
-    const empresa = request.session.users.empresa
+    const empresa = request.session.users.empresa    
+    //const type = request.session.users.type and type = '${type}'
     const calleds = await db.all(`select * from called  where empresa = '${empresa}';`)
     response.render('user/called',{
         calleds
@@ -143,13 +152,11 @@ app.post('/user/query', async(request,response)=>{
     })
 })
 
-
-
 */Criando Router Admin /*
 
 app.use('/admin',(request, response, next)=> {
-  
-    if(request.session.users.type ==='Super Administrador'){
+
+      if(request.session.users.type ==='Super Administrador'){
         next(); 
     }
     // response.send('blocked')
@@ -186,10 +193,10 @@ app.get('/admin/userlist', async(request,response)=>{
 }) 
 
 app.post('/admin/userlist/edit/:id', async(request,response)=>{
-    const {name,empresa,email,password,status,type} = request.body
+    const {name,empresa,email,password,status,type,title} = request.body
     const {id} = request.params 
     const db = await dbConnection
-    await db.run(`update users set name ='${name}', empresa ='${empresa}', email ='${email}' , status ='${status}', password ='${password}', type ='${type}' where id = ${id};`)
+    await db.run(`update users set name ='${name}', empresa ='${empresa}', email ='${email}' , status ='${status}', password ='${password}', type ='${type}' , title ='${title}' where id = ${id};`)
     response.send('Usuário Alterado')
 }) 
 
@@ -244,10 +251,10 @@ app.get('/admin/called/new', async(request,response)=>{
 })
 
 app.post('/admin/called/new', async(request,response)=>{
-    const {email,description,status} = request.body
+    const {email,description,status,title} = request.body
     const empresa = request.session.users.empresa
     const db = await dbConnection
-    await db.run(`insert into called (email, description, status,empresa) values('${email}','${description}','${status}', '${empresa}');`)
+    await db.run(`insert into called (email, description, status,empresa,title) values('${email}','${description}','${status}', '${empresa}','${title}');`)
     response.render('admin/registration_called')
 })
 
@@ -257,7 +264,7 @@ app.post('/admin/called/new', async(request,response)=>{
 const init = async() =>{
 const db = await dbConnection
 await db.run('create table if not exists users (id INTEGER PRIMARY KEY, name text, email TEXT, password TEXT, status text, empresa text, type text);')
-await db.run('create table if not exists called (id INTEGER PRIMARY KEY, users_id INTEGER, email text, description TEXT, status text,empresa text);')
+await db.run('create table if not exists called (id INTEGER PRIMARY KEY, users_id INTEGER, email text, description TEXT, status text,empresa text,title text);')
 const name = 'Pedro Alisson'
 const empresa = 'dev'
 const email = 'pedrodevelope@gmail.com'
