@@ -252,14 +252,12 @@ app.get('/admin/called/new', async(request,response)=>{
 
 app.post('/admin/called/new', async(request,response)=>{
     const {email,description,status,title} = request.body
+    const id = request.session.users.id
     const empresa = request.session.users.empresa
     const db = await dbConnection
-    await db.run(`insert into called (email, description, status,empresa,title) values('${email}','${description}','${status}', '${empresa}','${title}');`)
+    await db.run(`insert into called (users_id, email, description, status, empresa,title) values('${id}','${email}','${description}','${status}','${empresa}','${title}');`)
     response.render('admin/registration_called')
 })
-
-
-
 
 const init = async() =>{
 const db = await dbConnection
